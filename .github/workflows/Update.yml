@@ -1,0 +1,31 @@
+name: Update
+
+on:
+  schedule:
+    - cron:  '0 6 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: 'main'
+
+      - name: Download
+        run: |
+          sudo apt-get -q update
+          sudo apt install rename
+          mkdir Rel
+          touch ./Rel/.nojekyll
+          cd ./Rel/
+          wget -c -nH -r -q -l0 -A "*.gz" -np -nd --wait=3 --execute="robots = off" --reject="*ALL*" https://epgshare01.online/epgshare01/
+
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./Rel
+          force_orphan: true
